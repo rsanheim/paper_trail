@@ -1,6 +1,8 @@
 require 'singleton'
 require 'yaml'
 
+YAML::ENGINE.yamler= 'syck'
+
 require 'action_controller'
 require 'active_record'
 
