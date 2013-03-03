@@ -3,7 +3,7 @@ require 'yaml'
 
 require 'action_controller'
 require 'active_record'
-require 'paper_trail/big_decimal_fix'
+require 'paper_trail/big_decimal_fix' if RUBY_VERSION == "1.9.2"
 
 require 'paper_trail/config'
 require 'paper_trail/controller'
