@@ -474,6 +474,18 @@ And then use it in your tests like this:
       end
     end
 
+## Using a custom serializer
+
+By default, PaperTrail stores your changes as a YAML dump. You can override this with the serializer config option:
+
+```ruby
+>> PaperTrail.serializer = MyCustomSerializer
+```
+
+A valid serializer is a `module` (or `class`) that defines a `load` and `dump` method.  These serializers are included in the gem for your convenience:
+
+* [Yaml](https://github.com/airblade/paper_trail/blob/master/lib/paper_trail/serializers/yaml.rb) - Default
+* [Json](https://github.com/airblade/paper_trail/blob/master/lib/paper_trail/serializers/json.rb)
 
 ## Deleting Old Versions
 
