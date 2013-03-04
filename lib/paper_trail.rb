@@ -10,6 +10,9 @@ require 'paper_trail/controller'
 require 'paper_trail/has_paper_trail'
 require 'paper_trail/version'
 
+require 'paper_trail/serializers/yaml'
+require 'paper_trail/serializers/json'
+
 # PaperTrail's module methods can be called in both models and controllers.
 module PaperTrail
 
@@ -52,6 +55,14 @@ module PaperTrail
     paper_trail_store[:controller_info] = value
   end
 
+  # Getter and Setter for PaperTrail Serializer
+  def self.serializer=(value)
+    PaperTrail.config.serializer = value
+  end
+
+  def self.serializer
+    PaperTrail.config.serializer
+  end
 
   private
 
@@ -65,4 +76,9 @@ module PaperTrail
     @@config ||= PaperTrail::Config.instance
   end
 
+  def self.configure
+    yield config
+  end
+
 end
+

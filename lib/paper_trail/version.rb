@@ -37,7 +37,7 @@ class Version < ActiveRecord::Base
     options.reverse_merge! :has_one => 3
 
     unless object.nil?
-      attrs = YAML::load object
+      attrs = PaperTrail.serializer.load object
 
       # Normally a polymorphic belongs_to relationship allows us
       # to get the object we belong to by calling, in this case,
@@ -60,6 +60,7 @@ class Version < ActiveRecord::Base
         model = klass.new
       end
 
+      model.class.unserialize_attributes_for_paper_trail attrs
       attrs.each do |k, v|
         begin
           model.send :write_attribute, k.to_sym , v

@@ -51,6 +51,48 @@ module PaperTrail
       def paper_trail_on
         self.paper_trail_active = true
       end
+
+      # Used for Version#object attribute
+      def serialize_attributes_for_paper_trail(attributes)
+        serialized_attributes.each do |key, coder|
+          if attributes.key?(key)
+            coder = PaperTrail::Serializers::Yaml unless coder.respond_to?(:dump) # Fall back to YAML if `coder` has no `dump` method
+            attributes[key] = coder.dump(attributes[key])
+          end
+        end
+      end
+
+      def unserialize_attributes_for_paper_trail(attributes)
+        serialized_attributes.each do |key, coder|
+          if attributes.key?(key)
+            coder = PaperTrail::Serializers::Yaml unless coder.respond_to?(:dump)
+            attributes[key] = coder.load(attributes[key])
+          end
+        end
+      end
+
+      # Used for Version#object_changes attribute
+      def serialize_attribute_changes(changes)
+        serialized_attributes.each do |key, coder|
+          if changes.key?(key)
+            coder = PaperTrail::Serializers::Yaml unless coder.respond_to?(:dump) # Fall back to YAML if `coder` has no `dump` method
+            old_value, new_value = changes[key]
+            changes[key] = [coder.dump(old_value),
+                            coder.dump(new_value)]
+          end
+        end
+      end
+
+      def unserialize_attribute_changes(changes)
+        serialized_attributes.each do |key, coder|
+          if changes.key?(key)
+            coder = PaperTrail::Serializers::Yaml unless coder.respond_to?(:dump)
+            old_value, new_value = changes[key]
+            changes[key] = [coder.load(old_value),
+                            coder.load(new_value)]
+          end
+        end
+      end
     end
 
     # Wrap the following methods in a module so we can include them only in the
@@ -117,7 +159,7 @@ module PaperTrail
       def merge_metadata(data)
         # First we merge the model-level metadata in `meta`.
         meta.each do |k,v|
-          data[k] = 
+          data[k] =
             if v.respond_to?(:call)
               v.call(self)
             elsif v.is_a?(Symbol) && respond_to?(v)
@@ -138,7 +180,10 @@ module PaperTrail
       end
 
       def object_to_string(object)
-        object.attributes.to_yaml
+        _attrs = object.attributes.tap do |attributes|
+          self.class.serialize_attributes_for_paper_trail attributes
+        end
+        PaperTrail.serializer.dump(_attrs)
       end
 
       def changed_notably?
